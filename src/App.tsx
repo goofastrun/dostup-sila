@@ -1,24 +1,48 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { Toaster } from "@/components/ui/toaster";
+import { Layout } from "@/components/Layout";
+import { Login } from "@/pages/Login";
+import { Register } from "@/pages/Register";
+import { Dashboard } from "@/pages/Dashboard";
+import { Profile } from "@/pages/Profile";
+import { Users } from "@/pages/Users";
+import { Roles } from "@/pages/Roles";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+const App = () => {
+  const [user, setUser] = useState(null);
+
+  return (
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-        </Routes>
+        {user ? (
+          <Layout userRole={user.role}>
+            <Routes>
+              <Route path="/" element={<Dashboard user={user} />} />
+              <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
+              {(user.role === "admin" || user.role === "manager") && (
+                <Route path="/users" element={<Users />} />
+              )}
+              {user.role === "admin" && (
+                <Route path="/roles" element={<Roles />} />
+              )}
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </Layout>
+        ) : (
+          <Routes>
+            <Route path="/login" element={<Login setUser={setUser} />} />
+            <Route path="/register" element={<Register setUser={setUser} />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        )}
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      <Toaster />
+    </QueryClientProvider>
+  );
+};
 
 export default App;
