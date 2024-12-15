@@ -134,7 +134,7 @@ app.get('/api/posts', async (req, res) => {
     
     if (role !== 'admin' && role !== 'manager') {
       if (department) {
-        query += ' WHERE posts.department = $1 OR posts.department = \'Для всех\'';
+        query += ' WHERE (posts.department = $1 OR posts.department = \'Для всех\')';
         params.push(department);
       }
     }
@@ -142,6 +142,8 @@ app.get('/api/posts', async (req, res) => {
     query += ' ORDER BY created_at DESC';
     
     console.log('Executing query:', query, 'with params:', params);
+    console.log('Department:', department, 'Role:', role);
+    
     const result = await pool.query(query, params);
     console.log('Query result:', result.rows);
     res.json(result.rows);

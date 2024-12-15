@@ -26,11 +26,14 @@ export const Dashboard = ({ user }) => {
   const { toast } = useToast();
 
   // Обновленный запрос с правильной передачей параметров department и role
+
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["posts", user.department, user.role],
     queryFn: async () => {
-      console.log("Fetching posts for department:", user.department, "role:", user.role);
-      const response = await fetch(`/api/posts?department=${encodeURIComponent(user.department)}&role=${encodeURIComponent(user.role)}`);
+      console.log("Fetching posts for user:", user);
+      const response = await fetch(
+        `/api/posts?department=${encodeURIComponent(user.department || '')}&role=${encodeURIComponent(user.role || '')}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch posts");
       }
