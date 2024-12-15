@@ -25,14 +25,18 @@ export const Dashboard = ({ user }) => {
   const [selectedDepartment, setSelectedDepartment] = useState("Для всех");
   const { toast } = useToast();
 
+  // Обновленный запрос с правильной передачей параметров department и role
   const { data: posts = [], refetch } = useQuery({
-    queryKey: ["posts"],
+    queryKey: ["posts", user.department, user.role],
     queryFn: async () => {
-      const response = await fetch(`/api/posts?department=${user.department}&role=${user.role}`);
+      console.log("Fetching posts for department:", user.department, "role:", user.role);
+      const response = await fetch(`/api/posts?department=${encodeURIComponent(user.department)}&role=${encodeURIComponent(user.role)}`);
       if (!response.ok) {
         throw new Error("Failed to fetch posts");
       }
-      return response.json();
+      const data = await response.json();
+      console.log("Fetched posts:", data);
+      return data;
     },
   });
 

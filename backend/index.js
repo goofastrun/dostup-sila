@@ -139,9 +139,14 @@ app.get('/api/posts', async (req, res) => {
       }
     }
     
+    query += ' ORDER BY created_at DESC';
+    
+    console.log('Executing query:', query, 'with params:', params);
     const result = await pool.query(query, params);
+    console.log('Query result:', result.rows);
     res.json(result.rows);
   } catch (error) {
+    console.error('Error fetching posts:', error);
     res.status(500).json({ error: error.message });
   }
 });
