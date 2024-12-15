@@ -20,6 +20,8 @@ services:
       - /app/node_modules
     environment:
       - VITE_API_URL=http://localhost:3000
+    ports:
+      - "8080"
     networks:
       - app-network
 
@@ -44,7 +46,7 @@ services:
       - POSTGRES_DB=access_control
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./pg_hba.conf:/etc/lib/postgresql/data/pg_hba.conf
+      - ./pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
     ports:
       - "5432:5432"
     networks:
