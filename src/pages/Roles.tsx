@@ -40,21 +40,47 @@ export const Roles = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: number) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        refetch();
+        toast({
+          title: "Успешно",
+          description: "Пользователь удален",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить пользователя",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Фильтруем пользователей, оставляя только user и manager
+  const filteredUsers = users.filter(user => user.role === 'user' || user.role === 'manager');
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Роли</h1>
       <Card className="p-6">
         <div className="space-y-4">
-          <div className="grid grid-cols-5 font-semibold">
+          <div className="grid grid-cols-6 font-semibold">
             <div>Имя</div>
             <div>Почта</div>
             <div>Пол</div>
             <div>Роль</div>
             <div>Действия</div>
+            <div>Удаление</div>
           </div>
-          {users.length > 0 ? (
-            users.map((user) => (
-              <div key={user.id} className="grid grid-cols-5 items-center">
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((user) => (
+              <div key={user.id} className="grid grid-cols-6 items-center">
                 <div>{user.name}</div>
                 <div>{user.email}</div>
                 <div>{user.gender === 'male' ? 'Мужской' : 'Женский'}</div>
@@ -76,13 +102,14 @@ export const Roles = () => {
                   >
                     Менеджер
                   </Button>
+                </div>
+                <div>
                   <Button
-                    variant="outline"
+                    variant="destructive"
                     size="sm"
-                    onClick={() => handleRoleChange(user.id, 'admin')}
-                    disabled={user.role === 'admin'}
+                    onClick={() => handleDeleteUser(user.id)}
                   >
-                    Админ
+                    Удалить
                   </Button>
                 </div>
               </div>

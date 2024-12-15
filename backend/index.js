@@ -134,7 +134,7 @@ app.get('/api/posts', async (req, res) => {
     
     if (role !== 'admin' && role !== 'manager') {
       if (department) {
-        query += ' WHERE department = $1 OR department = \'Для всех\'';
+        query += ' WHERE posts.department = $1 OR posts.department = \'Для всех\'';
         params.push(department);
       }
     }
