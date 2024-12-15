@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 const departments = [
   "Для всех",
@@ -20,10 +21,20 @@ const departments = [
 ];
 
 export const Dashboard = ({ user }) => {
-  const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("Для всех");
   const { toast } = useToast();
+
+  const { data: posts = [], refetch } = useQuery({
+    queryKey: ["posts"],
+    queryFn: async () => {
+      const response = await fetch(`/api/posts?department=${user.department}&role=${user.role}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+      return response.json();
+    },
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,10 +52,9 @@ export const Dashboard = ({ user }) => {
       });
 
       if (response.ok) {
-        const post = await response.json();
-        setPosts([post, ...posts]);
         setNewPost("");
         setSelectedDepartment("Для всех");
+        refetch(); // Обновляем список записей
         toast({
           title: "Успешно",
           description: "Запись добавлена",
@@ -103,11 +113,16 @@ export const Dashboard = ({ user }) => {
           <Card key={post.id} className="w-full">
             <CardContent className="pt-6">
               <div className="flex justify-between items-start mb-4">
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">
+                    {post.department}
+                  </span>
+                  <span className="text-sm font-medium">
+                    {post.author_name}
+                  </span>
+                </div>
                 <span className="text-sm text-muted-foreground">
-                  {post.department}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(post.createdAt).toLocaleDateString()}
+                  {new Date(post.created_at).toLocaleString()}
                 </span>
               </div>
               <p className="whitespace-pre-wrap">{post.content}</p>
