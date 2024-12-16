@@ -1,10 +1,33 @@
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Настройка multer для загрузки файлов
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname))
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Создаем папку uploads если её нет
+const fs = require('fs');
+if (!fs.existsSync('uploads')){
+    fs.mkdirSync('uploads');
+}
+
+// Раздача статических файлов
+app.use('/uploads', express.static('uploads'));
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL
@@ -35,7 +58,8 @@ async function initDB() {
         content TEXT NOT NULL,
         department VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        author_id INTEGER REFERENCES users(id)
+        author_id INTEGER REFERENCES users(id),
+        file_url VARCHAR(255)
       );
     `);
   } finally {
@@ -111,13 +135,15 @@ app.put('/api/users/:id/role', async (req, res) => {
   }
 });
 
-// Создание записи
-app.post('/api/posts', async (req, res) => {
+// Создание записи с файлом
+app.post('/api/posts', upload.single('file'), async (req, res) => {
   const { content, department, authorId } = req.body;
+  const file_url = req.file ? `/uploads/${req.file.filename}` : null;
+  
   try {
     const result = await pool.query(
-      'INSERT INTO posts (content, department, author_id) VALUES ($1, $2, $3) RETURNING *',
-      [content, department, authorId]
+      'INSERT INTO posts (content, department, author_id, file_url) VALUES ($1, $2, $3, $4) RETURNING *',
+      [content, department, authorId, file_url]
     );
     res.json(result.rows[0]);
   } catch (error) {

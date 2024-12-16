@@ -64,6 +64,8 @@ export const Profile = ({ user, setUser }) => {
     }));
   };
 
+  const showDepartment = user.role === 'user';
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Личный кабинет</h1>
@@ -118,7 +120,7 @@ export const Profile = ({ user, setUser }) => {
         <CardContent>
           <div className="space-y-2">
             <p><strong>Роль:</strong> {getRoleInRussian(user.role)}</p>
-            <p><strong>Отдел:</strong> {user.department}</p>
+            {showDepartment && <p><strong>Отдел:</strong> {user.department}</p>}
           </div>
         </CardContent>
       </Card>

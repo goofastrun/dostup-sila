@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { Paperclip } from "lucide-react";
 
 const departments = [
   "Для всех",
@@ -23,6 +24,8 @@ const departments = [
 export const Dashboard = ({ user }) => {
   const [newPost, setNewPost] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("Для всех");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
   const { toast } = useToast();
 
   const { data: posts = [], refetch } = useQuery({
@@ -41,24 +44,43 @@ export const Dashboard = ({ user }) => {
     },
   });
 
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      toast({
+        title: "Файл выбран",
+        description: file.name,
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newPost.trim()) return;
 
+    const formData = new FormData();
+    formData.append('content', newPost);
+    formData.append('department', selectedDepartment);
+    formData.append('authorId', user.id);
+    if (selectedFile) {
+      formData.append('file', selectedFile);
+    }
+
     try {
       const response = await fetch("/api/posts", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: newPost,
-          department: selectedDepartment,
-          authorId: user.id,
-        }),
+        body: formData,
       });
 
       if (response.ok) {
         setNewPost("");
         setSelectedDepartment("Для всех");
+        setSelectedFile(null);
         refetch();
         toast({
           title: "Успешно",
@@ -106,6 +128,16 @@ export const Dashboard = ({ user }) => {
                     ))}
                   </SelectContent>
                 </Select>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <Button type="button" variant="outline" onClick={handleFileClick}>
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  {selectedFile ? selectedFile.name : "Прикрепить файл"}
+                </Button>
                 <Button type="submit">Добавить запись</Button>
               </div>
             </form>
@@ -131,6 +163,17 @@ export const Dashboard = ({ user }) => {
                 </span>
               </div>
               <p className="whitespace-pre-wrap">{post.content}</p>
+              {post.file_url && (
+                <a 
+                  href={post.file_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center mt-2 text-sm text-blue-500 hover:underline"
+                >
+                  <Paperclip className="h-4 w-4 mr-1" />
+                  Прикрепленный файл
+                </a>
+              )}
             </CardContent>
           </Card>
         ))}

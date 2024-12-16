@@ -1,14 +1,22 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
-import { Home, User, Users, Settings } from "lucide-react";
+import { Home, User, Users, Settings, LogOut } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
   userRole?: "admin" | "manager" | "user";
+  setUser?: (user: any) => void;
 }
 
-export const Layout = ({ children, userRole = "user" }: LayoutProps) => {
+export const Layout = ({ children, userRole = "user", setUser }: LayoutProps) => {
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (setUser) {
+      setUser(null);
+      navigate("/login");
+    }
+  };
 
   const menuItems = [
     { title: "Главная", icon: Home, path: "/", roles: ["admin", "manager", "user"] },
@@ -34,6 +42,14 @@ export const Layout = ({ children, userRole = "user" }: LayoutProps) => {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild onClick={handleLogout}>
+                    <div className="flex items-center gap-2 cursor-pointer text-red-500">
+                      <LogOut className="h-4 w-4" />
+                      <span>Выйти</span>
+                    </div>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarGroupContent>
             </SidebarGroup>
           </SidebarContent>
