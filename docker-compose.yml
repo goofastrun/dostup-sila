@@ -37,6 +37,8 @@ services:
       - db
     networks:
       - app-network
+    volumes:
+      - ./uploads:/app/uploads
 
   db:
     image: postgres:15-alpine
@@ -46,7 +48,6 @@ services:
       - POSTGRES_DB=access_control
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
     ports:
       - "5432:5432"
     networks:
@@ -54,6 +55,7 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
 
 networks:
   app-network:

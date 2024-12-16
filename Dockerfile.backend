@@ -7,4 +7,6 @@ RUN npm install
 
 COPY backend .
 
+RUN mkdir -p uploads
+
 CMD ["npm", "start"]
