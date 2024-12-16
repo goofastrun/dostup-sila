@@ -16,7 +16,9 @@ export const Roles = () => {
       if (!response.ok) {
         throw new Error("Failed to fetch users");
       }
-      return response.json();
+      const data = await response.json();
+      // Filter out admin users, but include both users and managers
+      return data.filter(user => user.role !== 'admin');
     },
   });
 
@@ -72,6 +74,17 @@ export const Roles = () => {
     }
   };
 
+  const getRoleInRussian = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'manager':
+        return 'Менеджер';
+      case 'user':
+        return 'Пользователь';
+      default:
+        return role;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Управление ролями</h1>
@@ -85,6 +98,7 @@ export const Roles = () => {
                   <p className="font-medium">{user.name}</p>
                   <p className="text-sm text-muted-foreground">{user.email}</p>
                   <p className="text-sm text-muted-foreground">Отдел: {user.department}</p>
+                  <p className="text-sm text-muted-foreground">Текущая роль: {getRoleInRussian(user.role)}</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <Select

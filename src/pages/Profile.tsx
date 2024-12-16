@@ -4,6 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
+const getRoleInRussian = (role: string) => {
+  switch (role.toLowerCase()) {
+    case 'admin':
+      return 'Администратор';
+    case 'manager':
+      return 'Менеджер';
+    case 'user':
+      return 'Пользователь';
+    default:
+      return role;
+  }
+};
+
 export const Profile = ({ user, setUser }) => {
   const [formData, setFormData] = useState({
     name: user.name || "",
@@ -104,7 +117,7 @@ export const Profile = ({ user, setUser }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <p><strong>Роль:</strong> {user.role}</p>
+            <p><strong>Роль:</strong> {getRoleInRussian(user.role)}</p>
             <p><strong>Отдел:</strong> {user.department}</p>
           </div>
         </CardContent>
