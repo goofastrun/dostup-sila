@@ -6,10 +6,13 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - frontend
       - backend
+      - frontend
+
     networks:
       - app-network
+
+    
 
   frontend:
     build:
@@ -25,6 +28,7 @@ services:
     networks:
       - app-network
 
+
   backend:
     build:
       context: .
@@ -37,25 +41,26 @@ services:
       - db
     networks:
       - app-network
-    volumes:
-      - ./uploads:/app/uploads
+    
 
   db:
-    image: postgres:15-alpine
+    image: postgres:latest
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=access_control
+      - POSTGRES_DB=docker exec -it db-1 psql -U postgres
+
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
+      - ./pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
     ports:
       - "5432:5432"
     networks:
       - app-network
 
+
 volumes:
-  postgres_data:
-    driver: local
+  db_data:
 
 networks:
   app-network:
