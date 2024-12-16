@@ -153,6 +153,20 @@ app.get('/api/posts', async (req, res) => {
   }
 });
 
+// Обновление профиля пользователя
+app.put('/api/users/:id', async (req, res) => {
+  const { name, email, birth_date } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE users SET name = $1, email = $2, birth_date = $3 WHERE id = $4 RETURNING *',
+      [name, email, birth_date, req.params.id]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -1,48 +1,38 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-const departments = [
-  "Бухгалтерия",
-  "Отдел маркетинга",
-  "Отдел кадров",
-  "Отдел технического контроля",
-  "Отдел сбыта",
-  "Отдел IT",
-  "Отдел логистики и транспорта",
-  "Отдел клиентской поддержки",
-  "Отдел разработки и исследований",
-  "Отдел закупок",
-];
-
 export const Profile = ({ user, setUser }) => {
-  const [formData, setFormData] = useState(user);
-  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    name: user.name || "",
+    email: user.email || "",
+    birth_date: user.birth_date ? new Date(user.birth_date).toISOString().split('T')[0] : "",
+  });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const { toast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         const updatedUser = await response.json();
-        setUser(updatedUser);
+        setUser({ ...user, ...updatedUser });
         toast({
           title: "Успешно",
           description: "Профиль обновлен",
         });
+      } else {
+        throw new Error("Failed to update profile");
       }
     } catch (error) {
       toast({
@@ -53,14 +43,34 @@ export const Profile = ({ user, setUser }) => {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Личный кабинет</h1>
+      
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Личный кабинет</CardTitle>
+          <CardTitle>Редактировать профиль</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="name">Имя</label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </div>
+            
             <div className="space-y-2">
               <label htmlFor="email">Email</label>
               <Input
@@ -69,74 +79,34 @@ export const Profile = ({ user, setUser }) => {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
               />
             </div>
+            
             <div className="space-y-2">
-              <label htmlFor="name">Имя</label>
+              <label htmlFor="birth_date">Дата рождения</label>
               <Input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="birthDate">Дата рождения</label>
-              <Input
-                id="birthDate"
-                name="birthDate"
+                id="birth_date"
+                name="birth_date"
                 type="date"
-                value={formData.birthDate}
+                value={formData.birth_date}
                 onChange={handleChange}
-                required
               />
             </div>
-            <div className="space-y-2">
-              <label>Пол</label>
-              <Select
-                value={formData.gender}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, gender: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите пол" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Мужской</SelectItem>
-                  <SelectItem value="female">Женский</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {formData.role === "user" && (
-              <div className="space-y-2">
-                <label>Отдел</label>
-                <Select
-                  value={formData.department}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, department: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите отдел" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((dept) => (
-                      <SelectItem key={dept} value={dept}>
-                        {dept}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-            <Button type="submit" className="w-full">
-              Сохранить изменения
-            </Button>
+            
+            <Button type="submit">Сохранить изменения</Button>
           </form>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Информация о пользователе</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p><strong>Роль:</strong> {user.role}</p>
+            <p><strong>Отдел:</strong> {user.department}</p>
+          </div>
         </CardContent>
       </Card>
     </div>

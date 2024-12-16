@@ -25,8 +25,6 @@ export const Dashboard = ({ user }) => {
   const [selectedDepartment, setSelectedDepartment] = useState("Для всех");
   const { toast } = useToast();
 
-  // Обновленный запрос с правильной передачей параметров department и role
-
   const { data: posts = [], refetch } = useQuery({
     queryKey: ["posts", user.department, user.role],
     queryFn: async () => {
@@ -61,7 +59,7 @@ export const Dashboard = ({ user }) => {
       if (response.ok) {
         setNewPost("");
         setSelectedDepartment("Для всех");
-        refetch(); // Обновляем список записей
+        refetch();
         toast({
           title: "Успешно",
           description: "Запись добавлена",
