@@ -68,7 +68,6 @@ export const Profile = ({ user, setUser }) => {
     }));
   };
 
-  // Show department only for users, not for managers or admins
   const showDepartment = user.role === 'user';
 
   return (
