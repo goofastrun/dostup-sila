@@ -63,7 +63,8 @@ app.post('/api/login', async (req, res) => {
 // Получение списка пользователей
 app.get('/api/users', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM users WHERE role != $1', ['admin']);
+    // Only return users with role 'user', excluding managers and admins
+    const result = await pool.query('SELECT * FROM users WHERE role = $1', ['user']);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
