@@ -8,11 +8,8 @@ services:
     depends_on:
       - backend
       - frontend
-
     networks:
       - app-network
-
-    
 
   frontend:
     build:
@@ -28,7 +25,6 @@ services:
     networks:
       - app-network
 
-
   backend:
     build:
       context: .
@@ -41,26 +37,25 @@ services:
       - db
     networks:
       - app-network
-    
+    volumes:
+      - ./uploads:/app/uploads
 
   db:
-    image: postgres:latest
+    image: postgres:15-alpine
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=docker exec -it db-1 psql -U postgres
-
+      - POSTGRES_DB=access_control
     volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
       - app-network
 
-
 volumes:
-  db_data:
+  postgres_data:
+    driver: local
 
 networks:
   app-network:
