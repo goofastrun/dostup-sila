@@ -5,17 +5,15 @@ import { Home, User, Users, Settings, LogOut } from "lucide-react";
 interface LayoutProps {
   children: React.ReactNode;
   userRole?: "admin" | "manager" | "user";
-  setUser?: (user: any) => void;
+  setUser: (user: any) => void;
 }
 
 export const Layout = ({ children, userRole = "user", setUser }: LayoutProps) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    if (setUser) {
-      setUser(null);
-      navigate("/login");
-    }
+    setUser(null);
+    navigate("/login");
   };
 
   const menuItems = [

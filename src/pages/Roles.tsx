@@ -17,7 +17,6 @@ export const Roles = () => {
         throw new Error("Failed to fetch users");
       }
       const data = await response.json();
-      // Filter out admin users, but include both users and managers
       return data.filter(user => user.role !== 'admin');
     },
   });
@@ -29,7 +28,10 @@ export const Roles = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ role: newRole }),
+        body: JSON.stringify({ 
+          role: newRole,
+          department: newRole === 'user' ? 'Отдел IT' : undefined 
+        }),
       });
 
       if (response.ok) {

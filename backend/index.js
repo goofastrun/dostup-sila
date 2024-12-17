@@ -82,12 +82,20 @@ app.delete('/api/users/:id', async (req, res) => {
 
 // Обновление роли пользователя
 app.put('/api/users/:id/role', async (req, res) => {
-  const { role } = req.body;
+  const { role, department } = req.body;
   try {
-    const result = await pool.query(
-      'UPDATE users SET role = $1 WHERE id = $2 RETURNING *',
-      [role, req.params.id]
-    );
+    let query = 'UPDATE users SET role = $1';
+    const params = [role];
+    
+    if (department) {
+      query += ', department = $2';
+      params.push(department);
+    }
+    
+    query += ' WHERE id = $' + (params.length + 1) + ' RETURNING *';
+    params.push(req.params.id);
+    
+    const result = await pool.query(query, params);
     res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ error: error.message });

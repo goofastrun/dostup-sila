@@ -17,6 +17,10 @@ const getRoleInRussian = (role: string) => {
   }
 };
 
+const getGenderInRussian = (gender: string) => {
+  return gender === 'male' ? 'Мужской' : 'Женский';
+};
+
 export const Profile = ({ user, setUser }) => {
   const [formData, setFormData] = useState({
     name: user.name || "",
@@ -120,6 +124,7 @@ export const Profile = ({ user, setUser }) => {
         <CardContent>
           <div className="space-y-2">
             <p><strong>Роль:</strong> {getRoleInRussian(user.role)}</p>
+            <p><strong>Пол:</strong> {getGenderInRussian(user.gender)}</p>
             {showDepartment && <p><strong>Отдел:</strong> {user.department}</p>}
           </div>
         </CardContent>
