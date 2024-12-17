@@ -19,7 +19,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         {user ? (
-          <Layout userRole={user.role}>
+          <Layout userRole={user.role} setUser={setUser}>
             <Routes>
               <Route path="/" element={<Dashboard user={user} />} />
               <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
