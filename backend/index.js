@@ -33,37 +33,77 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
 
+// Функция для повторных попыток подключения
+const connectWithRetry = async () => {
+  let retries = 5;
+  while (retries) {
+    try {
+      const client = await pool.connect();
+      console.log('Successfully connected to database');
+      client.release();
+      return true;
+    } catch (err) {
+      console.log(`Failed to connect to database. Retries left: ${retries}`);
+      retries -= 1;
+      // Ждем 5 секунд перед следующей попыткой
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+  }
+  return false;
+};
+
 // Инициализация базы данных
 async function initDB() {
-  const client = await pool.connect();
   try {
-    // Создание таблицы пользователей
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        birth_date DATE NOT NULL,
-        gender VARCHAR(50) NOT NULL,
-        role VARCHAR(50) NOT NULL,
-        department VARCHAR(255)
-      );
-    `);
+    const connected = await connectWithRetry();
+    if (!connected) {
+      throw new Error('Failed to connect to database after multiple retries');
+    }
 
-    // Создание таблицы записей
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS posts (
-        id SERIAL PRIMARY KEY,
-        content TEXT NOT NULL,
-        department VARCHAR(255),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        author_id INTEGER REFERENCES users(id),
-        file_url VARCHAR(255)
-      );
-    `);
-  } finally {
-    client.release();
+    const client = await pool.connect();
+    try {
+      // Начинаем транзакцию
+      await client.query('BEGIN');
+
+      // Создание таблицы пользователей
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id SERIAL PRIMARY KEY,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          password VARCHAR(255) NOT NULL,
+          name VARCHAR(255) NOT NULL,
+          birth_date DATE NOT NULL,
+          gender VARCHAR(50) NOT NULL,
+          role VARCHAR(50) NOT NULL,
+          department VARCHAR(255)
+        );
+      `);
+
+      // Создание таблицы записей
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS posts (
+          id SERIAL PRIMARY KEY,
+          content TEXT NOT NULL,
+          department VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          author_id INTEGER REFERENCES users(id),
+          file_url VARCHAR(255)
+        );
+      `);
+
+      // Подтверждаем транзакцию
+      await client.query('COMMIT');
+      console.log('Database initialized successfully');
+    } catch (error) {
+      // В случае ошибки откатываем изменения
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Database initialization error:', error);
+    throw error;
   }
 }
 
@@ -196,4 +236,6 @@ app.put('/api/users/:id', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  // Инициализируем базу данных после запуска сервера
+  initDB().catch(console.error);
 });
