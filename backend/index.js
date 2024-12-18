@@ -3,10 +3,54 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const { pool, initDB } = require('./db/init');
+const { createClient } = require('redis');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Redis client setup
+const redisClient = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379'
+});
+
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.connect().catch(console.error);
+
+// Rate limiting middleware
+const rateLimiter = async (req, res, next) => {
+  try {
+    // Using user's IP as identifier
+    const identifier = req.ip;
+    const requests = await redisClient.get(identifier);
+
+    console.log(`Rate limit check for IP ${identifier}: ${requests} requests`);
+
+    if (requests === null) {
+      // First request, set initial count with 5 minute expiry
+      await redisClient.setEx(identifier, 300, 1);
+      return next();
+    }
+
+    const requestCount = parseInt(requests);
+    if (requestCount >= 5) {
+      console.log(`Rate limit exceeded for IP ${identifier}`);
+      return res.status(429).json({
+        error: 'Слишком много запросов. Пожалуйста, подождите 5 минут.'
+      });
+    }
+
+    // Increment request count
+    await redisClient.setEx(identifier, 300, requestCount + 1);
+    next();
+  } catch (error) {
+    console.error('Rate limiter error:', error);
+    next(); // Proceed even if rate limiting fails
+  }
+};
+
+// Apply rate limiting to all routes
+app.use(rateLimiter);
 
 // Настройка multer для загрузки файлов
 const storage = multer.diskStorage({
