@@ -1,5 +1,6 @@
 services:
   nginx:
+    container_name: Nginx
     image: nginx:alpine
     ports:
       - "8080:80"
@@ -12,6 +13,7 @@ services:
       - app-network
 
   frontend:
+    container_name: Frontend
     build:
       context: .
       dockerfile: Dockerfile.frontend
@@ -26,6 +28,7 @@ services:
       - app-network
 
   backend:
+    container_name: Backend
     build:
       context: .
       dockerfile: Dockerfile.backend
@@ -45,6 +48,7 @@ services:
       - ./uploads:/app/uploads
 
   redis:
+    container_name: Redis
     image: redis:alpine
     ports:
       - "6379:6379"
@@ -57,6 +61,7 @@ services:
       retries: 5
 
   db:
+    container_name: Database
     image: postgres:15-alpine
     environment:
       - POSTGRES_USER=postgres

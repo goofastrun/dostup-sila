@@ -22,31 +22,39 @@ redisClient.connect().catch(console.error);
 
 // Middleware для ограничения количества запросов (Rate Limiting)
 const rateLimiter = async (req, res, next) => {
-  try {
-    // Используем комбинацию IP адреса и пути запроса как уникальный идентификатор
-    // Это позволяет отслеживать попытки для конкретных эндпоинтов
-    const identifier = `${req.ip}:${req.path}`;
-    const requests = await redisClient.get(identifier);
+  // Пропускаем rate limiting для всех маршрутов кроме /api/login
+  if (req.path !== '/api/login') {
+    return next();
+  }
 
-    console.log(`Проверка лимита запросов для ${identifier}: ${requests} запросов`);
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return next();
+    }
+
+    // Используем email как уникальный идентификатор для отслеживания попыток входа
+    const requests = await redisClient.get(email);
+    
+    console.log(`Проверка лимита запросов для email ${email}: ${requests} попыток входа`);
 
     if (requests === null) {
-      // Первый запрос - устанавливаем начальное значение счетчика
+      // Первая попытка входа - устанавливаем начальное значение счетчика
       // Время жизни ключа - 5 минут (300 секунд)
-      await redisClient.setEx(identifier, 300, 1);
+      await redisClient.setEx(email, 300, '1');
       return next();
     }
 
     const requestCount = parseInt(requests);
     if (requestCount >= 5) {
-      console.log(`Превышен лимит запросов для ${identifier}`);
+      console.log(`Превышен лимит попыток входа для ${email}`);
       return res.status(429).json({
-        error: 'Слишком много запросов. Пожалуйста, подождите 5 минут.'
+        error: 'Слишком много попыток входа. Пожалуйста, подождите 5 минут.'
       });
     }
 
-    // Увеличиваем счетчик запросов
-    await redisClient.setEx(identifier, 300, requestCount + 1);
+    // Увеличиваем счетчик попыток
+    await redisClient.setEx(email, 300, String(requestCount + 1));
     next();
   } catch (error) {
     console.error('Ошибка в работе rate limiter:', error);
