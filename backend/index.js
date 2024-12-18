@@ -9,47 +9,52 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Redis client setup
+// Настройка клиента Redis
+// Создаем подключение к Redis, используя URL из переменных окружения или локальный адрес
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379'
 });
 
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
+// Обработка ошибок подключения к Redis
+redisClient.on('error', (err) => console.log('Ошибка подключения к Redis:', err));
+// Установка соединения с Redis
 redisClient.connect().catch(console.error);
 
-// Rate limiting middleware
+// Middleware для ограничения количества запросов (Rate Limiting)
 const rateLimiter = async (req, res, next) => {
   try {
-    // Using user's IP as identifier
-    const identifier = req.ip;
+    // Используем комбинацию IP адреса и пути запроса как уникальный идентификатор
+    // Это позволяет отслеживать попытки для конкретных эндпоинтов
+    const identifier = `${req.ip}:${req.path}`;
     const requests = await redisClient.get(identifier);
 
-    console.log(`Rate limit check for IP ${identifier}: ${requests} requests`);
+    console.log(`Проверка лимита запросов для ${identifier}: ${requests} запросов`);
 
     if (requests === null) {
-      // First request, set initial count with 5 minute expiry
+      // Первый запрос - устанавливаем начальное значение счетчика
+      // Время жизни ключа - 5 минут (300 секунд)
       await redisClient.setEx(identifier, 300, 1);
       return next();
     }
 
     const requestCount = parseInt(requests);
     if (requestCount >= 5) {
-      console.log(`Rate limit exceeded for IP ${identifier}`);
+      console.log(`Превышен лимит запросов для ${identifier}`);
       return res.status(429).json({
         error: 'Слишком много запросов. Пожалуйста, подождите 5 минут.'
       });
     }
 
-    // Increment request count
+    // Увеличиваем счетчик запросов
     await redisClient.setEx(identifier, 300, requestCount + 1);
     next();
   } catch (error) {
-    console.error('Rate limiter error:', error);
-    next(); // Proceed even if rate limiting fails
+    console.error('Ошибка в работе rate limiter:', error);
+    next(); // Продолжаем выполнение даже при ошибке в rate limiter
   }
 };
 
-// Apply rate limiting to all routes
+// Применяем ограничение запросов ко всем маршрутам
 app.use(rateLimiter);
 
 // Настройка multer для загрузки файлов
@@ -90,16 +95,21 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   try {
+    // Проверяем учетные данные в базе данных
     const result = await pool.query(
       'SELECT * FROM users WHERE email = $1 AND password = $2',
       [email, password]
     );
+    
     if (result.rows.length > 0) {
+      // Если пользователь найден, возвращаем его данные
       res.json(result.rows[0]);
     } else {
+      // Если пользователь не найден, возвращаем ошибку
       res.status(401).json({ error: 'Неверный email или пароль' });
     }
   } catch (error) {
+    console.error('Ошибка при попытке входа:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -206,6 +216,6 @@ app.put('/api/users/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Сервер запущен на порту ${PORT}`);
   initDB().catch(console.error);
 });
