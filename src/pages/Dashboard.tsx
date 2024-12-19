@@ -21,20 +21,10 @@ const departments = [
   "Отдел закупок",
 ];
 
-const requestTopics = [
-  "Запрос на изменение расписания",
-  "Заявка на отпуск или отгул",
-  "Заявка на заказ оборудования",
-  "Заявка на перевод в другой отдел",
-  "Жалоба или предложение"
-];
-
 export const Dashboard = ({ user }) => {
   const [newPost, setNewPost] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("Для всех");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [requestTopic, setRequestTopic] = useState("");
-  const [requestMessage, setRequestMessage] = useState("");
   const fileInputRef = useRef(null);
   const { toast } = useToast();
 
@@ -106,47 +96,6 @@ export const Dashboard = ({ user }) => {
     }
   };
 
-  const handleRequestSubmit = async (e) => {
-    e.preventDefault();
-    if (!requestTopic || !requestMessage.trim()) {
-      toast({
-        title: "Ошибка",
-        description: "Заполните все поля заявки",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/requests", {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          topic: requestTopic,
-          message: requestMessage,
-          authorId: user.id,
-        }),
-      });
-
-      if (response.ok) {
-        setRequestTopic("");
-        setRequestMessage("");
-        toast({
-          title: "Успешно",
-          description: "Заявка отправлена",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Не удалось отправить заявку",
-        variant: "destructive",
-      });
-    }
-  };
-
   const canCreatePost = user.role === "admin" || user.role === "manager";
 
   return (
@@ -191,35 +140,6 @@ export const Dashboard = ({ user }) => {
                 </Button>
                 <Button type="submit">Добавить запись</Button>
               </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
-
-      {user.role === "user" && (
-        <Card className="w-full">
-          <CardContent className="pt-6">
-            <h2 className="text-xl font-semibold mb-4">Отправить заявку</h2>
-            <form onSubmit={handleRequestSubmit} className="space-y-4">
-              <Select value={requestTopic} onValueChange={setRequestTopic}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите тему заявки" />
-                </SelectTrigger>
-                <SelectContent>
-                  {requestTopics.map((topic) => (
-                    <SelectItem key={topic} value={topic}>
-                      {topic}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Textarea
-                placeholder="Введите текст заявки..."
-                value={requestMessage}
-                onChange={(e) => setRequestMessage(e.target.value)}
-                className="min-h-[100px]"
-              />
-              <Button type="submit">Отправить заявку</Button>
             </form>
           </CardContent>
         </Card>

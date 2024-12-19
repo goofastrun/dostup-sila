@@ -1,6 +1,6 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
-import { Home, User, Users, Settings, LogOut, InboxIcon } from "lucide-react";
+import { Home, User, Users, Settings, LogOut } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,7 +20,6 @@ export const Layout = ({ children, userRole = "user", setUser }: LayoutProps) =>
     { title: "Главная", icon: Home, path: "/", roles: ["admin", "manager", "user"] },
     { title: "Личный кабинет", icon: User, path: "/profile", roles: ["admin", "manager", "user"] },
     { title: "Пользователи", icon: Users, path: "/users", roles: ["admin", "manager"] },
-    { title: "Заявки", icon: InboxIcon, path: "/requests", roles: ["admin", "manager"] },
     { title: "Роли", icon: Settings, path: "/roles", roles: ["admin"] },
   ].filter(item => item.roles.includes(userRole));
 
