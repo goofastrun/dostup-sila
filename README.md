@@ -1,69 +1,89 @@
-# Welcome to your Lovable project
+# Система контроля доступа
 
-## Project info
+## Роли в системе
 
-**URL**: https://lovable.dev/projects/953f03f8-380d-4347-9fa1-f2827fbf0421
+### 1. Администратор (admin)
+- Полный доступ к системе
+- Управление пользователями (просмотр, удаление)
+- Управление ролями пользователей
+- Создание и просмотр записей для всех отделов
+- Возможность массового удаления пользователей
 
-## How can I edit this code?
+### 2. Менеджер (manager)
+- Просмотр списка пользователей
+- Создание и просмотр записей для всех отделов
+- Нет доступа к управлению ролями
 
-There are several ways of editing your application.
+### 3. Пользователь (user)
+- Просмотр записей только своего отдела и общих записей
+- Управление своим профилем
+- Нет доступа к управлению пользователями и ролями
 
-**Use Lovable**
+## Страницы системы
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/953f03f8-380d-4347-9fa1-f2827fbf0421) and start prompting.
+### 1. Страница входа (/login)
+- Форма входа (email и пароль)
+- Ограничение попыток входа (5 попыток за 5 минут)
+- Перенаправление на главную страницу после успешного входа
 
-Changes made via Lovable will be committed automatically to this repo.
+### 2. Страница регистрации (/register)
+- Форма регистрации с полями:
+  - Email
+  - Пароль
+  - Имя
+  - Дата рождения
+  - Пол
+  - Роль
+  - Отдел (только для пользователей)
 
-**Use your preferred IDE**
+### 3. Главная страница (/)
+- Лента записей
+- Фильтрация записей по отделам
+- Создание новых записей (для админов и менеджеров)
+- Возможность прикрепления файлов к записям
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 4. Личный кабинет (/profile)
+- Просмотр и редактирование личной информации:
+  - Имя
+  - Email
+  - Дата рождения
+- Просмотр информации о роли и отделе
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 5. Страница пользователей (/users)
+- Доступна только для админов и менеджеров
+- Список всех пользователей с информацией:
+  - Имя
+  - Email
+  - Пол
+  - Дата рождения
+  - Отдел
 
-Follow these steps:
+### 6. Страница управления ролями (/roles)
+- Доступна только для админов
+- Изменение ролей пользователей
+- Удаление пользователей
+- Массовое удаление пользователей (кроме админов)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Отделы
+- Бухгалтерия
+- Отдел маркетинга
+- Отдел кадров
+- Отдел технического контроля
+- Отдел сбыта
+- Отдел IT
+- Отдел логистики и транспорта
+- Отдел клиентской поддержки
+- Отдел разработки и исследований
+- Отдел закупок
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Безопасность
+- Ограничение попыток входа (5 попыток за 5 минут)
+- Блокировка доступа при превышении лимита попыток
+- Автоматическое обнуление счетчика попыток через 5 минут
+- Защита от несанкционированного доступа к страницам
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/953f03f8-380d-4347-9fa1-f2827fbf0421) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Дополнительные функции
+- Загрузка и хранение файлов
+- Система уведомлений через toast-сообщения
+- Адаптивный дизайн для всех страниц
+- Навигационное меню с динамическим отображением пунктов в зависимости от роли
