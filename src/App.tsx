@@ -8,6 +8,7 @@ import { Dashboard } from "@/pages/Dashboard";
 import { Profile } from "@/pages/Profile";
 import { Users } from "@/pages/Users";
 import { Roles } from "@/pages/Roles";
+import { Requests } from "@/pages/Requests";
 import { useState } from "react";
 
 const queryClient = new QueryClient();
@@ -24,7 +25,10 @@ const App = () => {
               <Route path="/" element={<Dashboard user={user} />} />
               <Route path="/profile" element={<Profile user={user} setUser={setUser} />} />
               {(user.role === "admin" || user.role === "manager") && (
-                <Route path="/users" element={<Users />} />
+                <>
+                  <Route path="/users" element={<Users />} />
+                  <Route path="/requests" element={<Requests />} />
+                </>
               )}
               {user.role === "admin" && (
                 <Route path="/roles" element={<Roles />} />

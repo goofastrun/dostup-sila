@@ -7,6 +7,7 @@ const { rateLimiter } = require('./middleware/rateLimiter');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const postRoutes = require('./routes/posts');
+const requestRoutes = require('./routes/requests');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/requests', requestRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

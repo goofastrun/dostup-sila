@@ -45,6 +45,7 @@ const initDB = async () => {
 
       const usersExists = await checkTableExists(client, 'users');
       const postsExists = await checkTableExists(client, 'posts');
+      const requestsExists = await checkTableExists(client, 'requests');
 
       if (!usersExists) {
         console.log('Creating users table...');
@@ -72,6 +73,20 @@ const initDB = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             author_id INTEGER REFERENCES users(id),
             file_url VARCHAR(255)
+          );
+        `);
+      }
+
+      if (!requestsExists) {
+        console.log('Creating requests table...');
+        await client.query(`
+          CREATE TABLE requests (
+            id SERIAL PRIMARY KEY,
+            topic VARCHAR(255) NOT NULL,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            author_id INTEGER REFERENCES users(id),
+            status VARCHAR(50) DEFAULT 'pending'
           );
         `);
       }
