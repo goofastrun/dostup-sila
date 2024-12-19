@@ -25,9 +25,10 @@ export const Login = ({ setUser }) => {
         setUser(user);
         navigate("/");
       } else {
+        const errorData = await response.json();
         toast({
           title: "Ошибка",
-          description: "Неверный email или пароль",
+          description: errorData.error || "Неверный email или пароль",
           variant: "destructive",
         });
       }

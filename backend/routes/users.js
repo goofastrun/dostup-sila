@@ -20,6 +20,21 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// New endpoint to delete all non-admin users
+router.delete('/', async (req, res) => {
+  try {
+    const result = await pool.query('DELETE FROM users WHERE role != $1 RETURNING *', ['admin']);
+    console.log(`Удалено ${result.rowCount} пользователей`);
+    res.json({ 
+      message: `Успешно удалено ${result.rowCount} пользователей`,
+      deletedUsers: result.rows 
+    });
+  } catch (error) {
+    console.error('Ошибка при удалении пользователей:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.put('/:id/role', async (req, res) => {
   const { role, department } = req.body;
   try {
