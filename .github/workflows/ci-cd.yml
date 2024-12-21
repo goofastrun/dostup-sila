@@ -30,6 +30,33 @@ jobs:
         sleep 30  # Даем время на запуск контейнеров
         docker-compose logs
         
+        # Проверка доступности сервисов
+        echo "Checking if Frontend is accessible..."
+        curl -f http://localhost:8080 || exit 1
+        
+        echo "Checking if Backend API is accessible..."
+        curl -f http://localhost:3000/health || exit 1
+        
+        echo "Checking database connection..."
+        docker-compose exec -T backend node -e "
+          const { pool } = require('./db/init');
+          pool.query('SELECT NOW()', (err, res) => {
+            if (err) {
+              console.error('Database connection failed:', err);
+              process.exit(1);
+            }
+            console.log('Database connection successful');
+            process.exit(0);
+          });
+        "
+        
+        echo "Checking Redis connection..."
+        docker-compose exec -T redis redis-cli ping || exit 1
+        
+    - name: Run Backend Tests
+      run: |
+        docker-compose exec -T backend npm test || exit 1
+        
     - name: Build and push Frontend
       uses: docker/build-push-action@v4
       with:
@@ -62,4 +89,13 @@ jobs:
           cd /opt/access-control
           docker-compose pull
           docker-compose up -d --force-recreate
+          
+          # Проверка после деплоя
+          echo "Waiting for services to start..."
+          sleep 30
+          
+          # Проверка доступности после деплоя
+          curl -f http://localhost:8080 || exit 1
+          curl -f http://localhost:3000/health || exit 1
+          
           docker system prune -f
