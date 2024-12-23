@@ -4,25 +4,17 @@
 
 ```mermaid
 graph TD
-    U[Пользователь] --> |1. HTTP/HTTPS запросы| N[Nginx]
-    N --> |2. Статические файлы| F[Frontend Container]
-    N --> |3. API запросы /api/*| B[Backend Container]
-    B --> |4. Кэширование сессий| R[Redis Container]
-    B --> |5. SQL запросы| DB[Database Container]
-    F --> |6. Запросы к API| N
-    R --> |7. Возврат данных сессии| B
-    DB --> |8. Возврат данных| B
-    B --> |9. Ответ API| N
-    N --> |10. Ответ клиенту| U
-    
-    subgraph Контейнеры
-        N[Nginx:<br/>Реверс-прокси<br/>Порт 80]
-        F[Frontend:<br/>React + Vite<br/>Порт 8080]
-        B[Backend:<br/>Node.js + Express<br/>Порт 3000]
-        R[Redis:<br/>Кэш + Сессии<br/>Порт 6379]
-        DB[База данных:<br/>PostgreSQL<br/>Порт 5432]
-    end
-    
+    U[Пользователь] --> |HTTP/HTTPS запросы| N[Nginx]
+    N --> |Статические файлы| F[Frontend Container]
+    N --> |API запросы /api/*| B[Backend Container]
+    B --> |Кэширование сессий| R[Redis Container]
+    B --> |SQL запросы| DB[PostgreSQL Container]
+    F --> |Запросы к API| N
+    R --> |Возврат данных сессии| B
+    DB --> |Возврат данных| B
+    B --> |Ответ API| N
+    N --> |Ответ клиенту| U
+
     style U fill:#f9f,stroke:#333,stroke-width:2px
     style N fill:#85C1E9,stroke:#333,stroke-width:2px
     style F fill:#82E0AA,stroke:#333,stroke-width:2px
@@ -30,8 +22,10 @@ graph TD
     style R fill:#F1948A,stroke:#333,stroke-width:2px
     style DB fill:#BB8FCE,stroke:#333,stroke-width:2px
 
-    classDef container fill:#f5f5f5,stroke:#333,stroke-width:2px
-    class N,F,B,R,DB container
+    classDef blackText fill:#000,stroke:#fff,stroke-width:2px,color:#fff;
+    class N,F,B,R,DB,U blackText
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9 fill:#000,stroke:#000,color:#fff
 ```
 
 ### Описание взаимодействия контейнеров
