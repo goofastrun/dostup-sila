@@ -15,12 +15,12 @@ graph TD
     B --> |9. Ответ API| N
     N --> |10. Ответ клиенту| U
     
-    subgraph Containers
+    subgraph Контейнеры
         N
         F[Frontend:<br/>React + Vite<br/>Порт 8080]
         B[Backend:<br/>Node.js + Express<br/>Порт 3000]
         R[Redis:<br/>Кэш + Сессии<br/>Порт 6379]
-        DB[Database:<br/>PostgreSQL<br/>Порт 5432]
+        DB[База данных:<br/>PostgreSQL<br/>Порт 5432]
     end
     
     style U fill:#f9f,stroke:#333,stroke-width:2px
