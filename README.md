@@ -2,6 +2,30 @@
 
 ## Архитектура системы
 
+```mermaid
+graph TD
+    U[Пользователь] --> N[Nginx]
+    N --> F[Frontend Container]
+    N --> B[Backend Container]
+    B --> R[Redis Container]
+    B --> DB[Database Container]
+    
+    subgraph Containers
+        N
+        F
+        B
+        R
+        DB
+    end
+    
+    style U fill:#f9f,stroke:#333,stroke-width:2px
+    style N fill:#85C1E9,stroke:#333,stroke-width:2px
+    style F fill:#82E0AA,stroke:#333,stroke-width:2px
+    style B fill:#F8C471,stroke:#333,stroke-width:2px
+    style R fill:#F1948A,stroke:#333,stroke-width:2px
+    style DB fill:#BB8FCE,stroke:#333,stroke-width:2px
+```
+
 ### База данных (PostgreSQL)
 - Хранит все данные системы в двух основных таблицах:
   1. `users` - информация о пользователях:
